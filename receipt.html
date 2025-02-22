@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Base styles for receipt */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.4;
+            color: #1a202c;
+            width: 100%;
+            max-width: 300px; /* Standar width untuk thermal printer 80mm */
+            margin: 0 auto;
+            padding: 20px 10px;
+            background: white;
+        }
+
+        /* Header styles */
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #CBD5E0;
+        }
+
+        .store-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .store-address {
+            font-size: 0.75rem;
+            color: #4A5568;
+            max-width: 200px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        /* Order info styles */
+        .order-info {
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+        }
+
+        .order-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            color: #4A5568;
+        }
+
+        /* Items table styles */
+        .items-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #CBD5E0;
+            padding-bottom: 10px;
+        }
+
+        .item {
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+
+        .item-name {
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .item-price {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .item-quantity {
+            color: #6B46C1;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        /* Totals section */
+        .totals {
+            margin-bottom: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .total-row.final {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #CBD5E0;
+        }
+
+        /* Payment info */
+        .payment-info {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            padding: 10px;
+            background: #F7FAFC;
+            border-radius: 4px;
+        }
+
+        .payment-status {
+            font-weight: 600;
+            color: #6B46C1;
+        }
+
+        /* Footer styles */
+        .receipt-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px dashed #CBD5E0;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .receipt-barcode {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .barcode-number {
+            font-family: monospace;
+            font-size: 0.65rem;
+            color: #718096;
+            position: absolute;
+            right: 10px;
+            bottom: 0;
+        }
+
+        /* Table number badge */
+        .table-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #6B46C1;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Notes section */
+        .order-notes {
+            margin: 15px 0;
+            padding: 10px;
+            background: #F7FAFC;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .notes-label {
+            color: #718096;
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+
+        /* Timestamp style */
+        .timestamp {
+            font-family: monospace;
+            font-size: 0.7rem;
+            color: #A0AEC0;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Add these new styles */
+        .cash-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #E2E8F0;
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #4A5568;
+            margin-bottom: 4px;
+        }
+
+        .payment-row:last-child {
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-header">
+        <div class="store-name">{{storeName}}</div>
+        <div class="store-address">{{storeAddress}}</div>
+    </div>
+
+    {{#if tableNumber}}
+    <div class="table-badge">
+        Table #{{tableNumber}}
+    </div>
+    {{/if}}
+
+    <div class="order-info">
+        <div class="order-details">
+            <span>Order #</span>
+            <span>{{orderId}}</span>
+        </div>
+        <div class="order-details">
+            <span>Date</span>
+            <span>{{orderDate}}</span>
+        </div>
+        <div class="order-details">
+            <span>Customer</span>
+            <span>{{customerName}}</span>
+        </div>
+    </div>
+
+    <div class="items-table">
+        {{#each items}}
+        <div class="item">
+            <div class="item-details">
+                <span class="item-name">
+                    <span class="item-quantity">x{{quantity}}</span>
+                    {{name}}
+                </span>
+                <span class="item-price">Rp {{price}}</span>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal</span>
+            <span>Rp {{subtotal}}</span>
+        </div>
+        <div class="total-row">
+            <span>Tax ({{taxRate}}%)</span>
+            <span>Rp {{tax}}</span>
+        </div>
+        <div class="total-row final">
+            <span>Total</span>
+            <span>Rp {{total}}</span>
+        </div>
+    </div>
+
+    <div class="payment-info">
+        <div class="payment-status">
+            {{paymentStatus}}
+            {{#if paymentMethod}}
+            - {{paymentMethod}}
+            {{/if}}
+        </div>
+        {{#if isCashPayment}}
+        <div class="cash-details">
+            <div class="payment-row">
+                <span>Cash Amount</span>
+                <span>Rp {{cashAmount}}</span>
+            </div>
+            <div class="payment-row">
+                <span>Change</span>
+                <span>Rp {{changeAmount}}</span>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+
+    {{#if orderNotes}}
+    <div class="order-notes">
+        <div class="notes-label">Notes:</div>
+        {{orderNotes}}
+    </div>
+    {{/if}}
+
+    <div class="receipt-footer">
+        <div class="footer-text">
+            {{footerText}}
+        </div>
+        <div class="receipt-barcode">
+            <img src="{{barcodeUrl}}" alt="Barcode" style="width: 200px; height: 40px;">
+        </div>
+        <div class="timestamp">
+            {{timestamp}}
+        </div>
+    </div>
+</body>
+</html>
